@@ -1,0 +1,237 @@
+Mitel::MslRest::msl(3)User Contributed Perl DocumentationMitel::MslRest::msl(3)
+
+
+
+MMSSLL pplluuggiinn
+       An mslrest plugin to permit access to core MSL data and functions.
+
+   AAPPII
+       The following methods are available:
+
+       _E_v_e_n_t_s _D_B _A_c_c_e_s_s
+
+       HEAD /mslrest/msl/v1/events/
+
+       Fetch events database metadata.
+
+       Returns HTTP headers only
+
+           * Last-Modified: <date> - if there's an event found in the db
+
+       GET /mslrest/msl/v1/events/
+
+       Fetch all event ids from the database.
+
+       Returns(json):
+
+           * events: a response object containing an array of event ids,
+           sorted from most recent to oldest by epochtime
+
+               {
+                   "response": [
+                       'id': 'miketug2.nssg.mitel.com_1-1368533960-59819'
+                   ]
+               }
+
+       GET /mslrest/msl/v1/events/count/
+
+       Fetch a count of the events from the database.
+
+       Returns(json):
+
+           * a response object with a key of "count", and an integer value.
+
+               {
+                   "count": 100
+               }
+
+       GET /mslrest/msl/v1/events/all/
+
+       Fetch all events from the database.
+
+       Returns(json):
+
+           * events: a response object containing an array of hashes, where
+           each hash is one event and the hash keys correspond to the database
+           column names, sorted from most recent to oldest by epochtime
+
+               {
+                   "response": [
+                       {   'application': 'MBG',
+                           'cleared': 0,
+                           'description': 'Uptime:591824, active-connections:5, Ip:10.38.200.149:6956, Tw_license:0, dnlist:2104, LocalIp:10.38.200.149:6956, Timestamp:1367942136, BootVer:2.5.0.5, MainVer:2.5.0.5, Icp:10.38.200.37, Type:191, ID:08:00:0F:19:9A:AF, Acceptor:SSL',
+                           'epochtime': 1368533960,
+                           'eventtype': 'set connection',
+                           'id': 'miketug2.nssg.mitel.com_1-1368533960-59819',
+                           'severity': 2,
+                           'value': 'status'}
+                   ]
+               }
+
+       GET /mslrest/msl/v1/events/#eventid/
+
+       Fetch an event from the database.
+
+       Returns(json):
+
+           * a hash where the hash keys correspond to the database column
+           names
+
+       PUT '/mslrest/msl/v1/events/#eventid/
+
+       Change event values in the database.
+
+       Input { attr: 'new value' }
+
+       Settable values: cleared -> t / f
+
+       Returns (json): { result: 'success' } on success
+
+       GET /mslrest/msl/v1/configuration/
+
+       Fetch basic configuration data about the server.
+
+       Returns(json)
+
+           * interfaces
+
+               * an interface block for each active interface
+
+                   {
+                       "<interface location identifier>": {
+                           {
+                               "configuration": "<static|dhcp|pppoe>",
+                               "address": "<ip address>",
+                               "mac": "<mac address>",
+                               "netmask": "<netmask>",
+                               "name": "<interface name>"
+                           }
+                       }[, next interface]
+                   }
+
+               * { "publicip": <blank|IP address if set> }
+
+               * { "fqdn": "fully qualified domain name of server" }
+
+               * { "arid": "blank|account Id of server" }
+
+               The interface location identifiers can be one of
+
+                   * InternalInterface
+
+                   * ExternalInterface
+
+                   * InterfaceThree
+
+                   * ExternalInterface2
+
+       GET /mslrest/msl/v1/blades/
+
+       Fetch the blades list (ie. not the installed blades, the available
+       ones)
+
+       Returns(json) - A response object containing an array of blade ids, in
+       no particular order.
+
+           ie.
+
+           {
+               "response": [
+                   "Blade-Mitel_Border_Gateway-8.0.10.0-01.noarch"
+               ]
+           }
+
+       GET /mslrest/msl/v1/blades/count/
+
+       Fetch the blades list size as an integer.
+
+       Returns(json) - A response object with the key "count" and an integer
+       value for the size of the list.
+
+           ie.
+
+           { "count": 2 }
+
+       GET /mslrest/msl/v1/blades/all/
+
+       Fetch the blades list (ie. not the installed blades, the available
+       ones)
+
+       Returns(json) - A hash of hashes, where the keys are the blade IDs and
+       the values are the blade properties. The fields containing comma-
+       separated values will be split into sub-arrays. This API guarantees no
+       particular sorting order.
+
+           ie.
+
+           {
+               "Blade-Mitel_Border_Gateway-8.0.10.0-01.noarch": {
+                   "Components": [
+                       "mitel-omm-2.6.4-01.noarch",
+                       "mitel-tna-4.3.0.36-01.noarch",
+                       "mitel-phoneloads-ip53series-5340-5.2.1.6-01.noarch",
+                       "mitel-msl-tug-1.7.149-01.i386",
+                       "dejavu-fonts-common-2.30-2.el6.noarch",
+                       "mitel-msl-vsftpd-1.0.3-01.noarch",
+                       "mitel-tug-4.3.0.36-01.i386",
+                       "mitel-spectralink-101.025-01.noarch",
+                       "mitel-phoneloads-ip5550TKB-9.7.0.3-01.noarch",
+                       "mitel-tug-debug-4.3.0.36-01.i386",
+                       "mitel-phoneloads-ip53series-5360-5.2.1.6-01.noarch",
+                       "dejavu-lgc-sans-mono-fonts-2.30-2.el6.noarch",
+                       "mitel-phoneloads-ip53series-5340e-5.2.1.6-01.noarch",
+                       "mitel-phoneloads-ip53series-5540-5.2.1.6-01.noarch",
+                       "Blade-Mitel_Border_Gateway-8.0.10.0-01.noarch",
+                       "mitel-phoneloads-minetboot-4.5.0.2-01.noarch",
+                       "python-crack-0.5.1-01.el6.i686",
+                       "mitel-phoneloads-minet5010_20-8.5.2.2-01.noarch",
+                       "fontpackages-filesystem-1.41-1.1.el6.noarch",
+                       "dejavu-sans-mono-fonts-2.30-2.el6.noarch",
+                       "mitel-padtai-4.3.0.36-01.noarch",
+                       "mitel-phoneloads-ipTurret-3.0.0.8-01.noarch",
+                       "vsftpd-2.2.2-11.el6.i686",
+                       "Django-south-0.7.6-1.el6.noarch",
+                       "mitel-msl-webproxy-1.5.79-01.i386",
+                       "mitel-dect-crdlsmod-01.06-01.noarch",
+                       "rrdtool-1.3.8-6.el6.i686",
+                       "python-tftpy-0.5.1-1el6.noarch",
+                       "mitel-phoneloads-ipphones-2.5.0.5-01.noarch",
+                       "mitel-msl-traffic-shaping-2.3.5-01.noarch",
+                       "mitel-phoneloads-ip53series-5304_12_24-5.2.1.6-01.noarch"
+                       ],
+                   "Description": "A secure gateway for VoIP traffic and associated Mitel applications",
+                   "Documentation": "http://portal.mitel.com/wps/wcm/myconnect/fbf7438042e016e592be97443299b01b/Mitel+Border+Gateway+Release+6.0+Product+Brief.pdf?MOD=AJPERES&attachment=true&id=%3E",
+                   "OldNames": [
+                       "6010_Teleworker_Solution",
+                       "Blade-6010_Teleworker_Solution",
+                       "Blade-Secure_Recording_Connector",
+                       "Blade-Teleworker_Solution",
+                       "Teleworker_Gateway"
+                       ],
+                   "Removable": "yes",
+                   "SupportStatus": "supported"
+               }
+           }
+
+       GET /mslrest/msl/v1/installed_blades/
+
+       Same as GET /mslrest/msl/blades/ above, but acting on the
+       installed_blades database.
+
+       GET /mslrest/msl/v1/installed_blades/count/
+
+       Same as GET /mslrest/msl/blades/ above, but acting on the
+       installed_blades database.
+
+       GET /mslrest/msl/v1/installed_blades/all/
+
+       Same as GET /mslrest/msl/blades/ above, but acting on the
+       installed_blades database.
+
+       GET /mslrest/msl/v1/metrics/
+
+       Retrieve metrics on the status of the MSL server.
+
+
+
+perl v5.10.1                      2013-11-29            Mitel::MslRest::msl(3)

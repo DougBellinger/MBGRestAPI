@@ -1,0 +1,886 @@
+Mitel::MslRest::mbg(3)User Contributed Perl DocumentationMitel::MslRest::mbg(3)
+
+
+
+MMBBGG pplluuggiinn
+       An mslrest plugin to permit access to core MBG data and functions.
+
+   AAPPII
+       The following methods are available:
+
+       _G_l_o_b_a_l _a_p_p_l_i_c_a_t_i_o_n _s_e_t_t_i_n_g_s
+
+       Note: For security reasons, this API never returns a list. Any lists
+       are nested within a JSON object with the key of "response".
+
+       GET /mslrest/mbg/v1/globaloptions/
+
+       Fetch all global application settings. This method returns the top-
+       level settings for MBG that apply across the application.
+
+       Returns(json)
+
+           ie.
+
+           {   "allow_g722": False,
+               "band_inbound": 0,
+               "band_outbound": 0,
+               "call_recording": False,
+               "daisy_ip": None,
+               "detailed_jitter_log": False,
+               "disable_srtp": False,
+               "dscp_signaling": "EF",
+               "dscp_voice": "EF",
+               "dscp_video": "EF",
+               "email_severity": 5,
+               "fallback_ips": "",
+               "kpml_password": "",
+               "kpml_username": "",
+               "local_streaming": False,
+               "log_verbosity": 0,
+               "network_profile": "lanmode",
+               "nlogs2keep": 14,
+               "prioritize_emerge_sip": True,
+               "restrict_minet": True,
+               "rtp_framesize": 0,
+               "rtp_icpside_addresses": "10.38.200.253",
+               "rtp_setside_addresses": "10.38.200.253",
+               "security_profile": "legacy",
+               "setside_codec": "g.729",
+               "srtp_ending_port": 31000,
+               "srtp_starting_port": 20000,
+               "video_starting_port": 31000,
+               "status": "enabled",
+               "tftp_blocksize": "4096",
+               "time_format": 12,
+               "transcoding": False,
+               "trap_severity": 5,
+               "tugid": "miketug2.nssg.mitel.com_1"
+           }
+
+       GET /mslrest/mbg/v1/globaloptions/:prop/
+
+       Fetch a single property from the globaloptions list.
+
+       Returns(json)
+
+       The single value like so:
+
+           { "name": "value" }
+
+       Or a 404 error if the option does not exist.
+
+       PUT /mslrest/mbg/v1/globaloptions/
+
+       Set one or more properties on the globaloptions list.
+
+       Returns 200 OK for success, an error code otherwise.
+
+       Input should be a json object of name/value pairs.
+
+           ie.
+               { "status": "disabled" }
+
+               or
+
+               {
+                   "local_streaming": true,
+                   "transcoding": false
+               }
+
+       GET /mslrest/mbg/v1/metrics/
+
+       Get a dump of the metrics table for MBG.
+
+       Returns 200 OK for success, an error code otherwise.
+
+       If 200, the metrics table is returned, JSON-encoded.
+
+           ie.
+           non-oauth parameters:
+           {   'active_calls': 0,
+               'active_connections': 0,
+               'bandwidth_icp_in': 0,
+               'bandwidth_icp_out': 0,
+               'bandwidth_set_in': 0,
+               'bandwidth_set_out': 0,
+               'calls_per_hour': 0,
+               'channel_licenses_c': 0,
+               'channel_licenses_ca': 0,
+               'channel_licenses_l': 0,
+               'device_licenses_c': 0,
+               'device_licenses_ca': 5000,
+               'device_licenses_l': 0,
+               'nat_licenses_c': 0,
+               'nat_licenses_ca': 5,
+               'nat_licenses_l': 0,
+               'tap_licenses_c': 0,
+               'tap_licenses_ca': 5,
+               'tap_licenses_l': 0,
+               'transcoding_licenses_c': 0,
+               'transcoding_licenses_ca': 0,
+               'transcoding_licenses_l': 0   }
+
+       For the licenses, the naming convention is _l for local licenses in
+       use, _c for cluster wide licenses in use, and _ca for cluster-wide
+       licenses available.
+
+       GET /mslrest/mbg/v1/siptrunks/
+
+       Returns a JSON object, with an embedded array of guids, at the key
+       "response".
+
+       GET /mslrest/mbg/v1/siptrunks/count/
+
+       Returns a JSON object, with the key "count", and an integer counting
+       the number of SIP trunk definitions in the db at this time.
+
+       GET /mslrest/mbg/v1/siptrunks/all/
+
+       Returns(json)
+
+       A response object, containing a list of sip trunk definitions, like so:
+
+           {
+               "response": [
+                   {   'accept_all_ports': 0,
+                       'calls': 0,
+                       'cph': 0,
+                       'enforce_is_codec': 'auto',
+                       'enforce_ss_codec': 'auto',
+                       'guid': 'fa796d4665d07113293f8fc0fd8a5af9af650af6',
+                       'heartbeat_interval': 60,
+                       'icpside_status': '',
+                       'idle': 0,
+                       'idle_timeout': 3600,
+                       'local_streaming': 0,
+                       'log_verbosity': -100,
+                       'max_calls': 0,
+                       'max_cph': 0,
+                       'name': 'Accessline',
+                       'options_hb': 'usemaster',
+                       'password': 'trunkpass',
+                       'prack_support': 'usemaster',
+                       'reinvite_filtering': 'off',
+                       'remote_addr': '10.11.12.13',
+                       'remote_framesize': 20,
+                       'remote_port': 5060,
+                       'rewrite_pai_host': 1,
+                       'rtp_addr_override': '',
+                       'set_side_rtp_security': 'usemaster',
+                       'trunkside_status': 'Accessline|up',
+                       'txn': 0,
+                       'txnerr': 0,
+                       'username': 'trunkuser'
+                   }
+               ]
+           }
+
+       The routing rules must be fetched separately. See below.
+
+       GET /mslrest/mbg/v1/siptrunks/#guid_or_address/
+
+       Same as above, but only fetch a single siptrunk definition as a JSON
+       object instead of a list.
+
+       DELETE /mslrest/mbg/v1/siptrunks/#guid_or_address/
+
+       Delete a siptrunk by its guid or remote address. Note that the deletion
+       will cascade to all routing rules referencing this trunk.
+
+       POST /mslrest/mbg/v1/siptrunks/
+
+       Create a new SIP trunk.
+
+       Input(json)
+
+       The SIP trunk definition:
+
+       ie.
+           minimum data
+
+           {
+               "name": "my sip trunk",
+               "remote_addr": "11.22.33.44", or "myprovider.foo.com",
+           }
+
+           see GET example for all available fields
+
+       Returns(json)
+
+       The guid of the new SIP trunk.
+
+       ie.
+           { "guid": "ab3395965f476d8d57917e99b9fb58f5a1c929c1" }
+
+       PUT /mslrest/mbg/v1/siptrunks/#guid_or_address/
+
+       Modify a property of the references SIP trunk definition.
+
+       Input(json)
+
+       The name and value to set.
+
+       ie.
+
+           { "name": "my other sip trunk name" }
+
+       Returns(json)
+
+       200 OK on success.
+
+       GET /mslrest/mbg/v1/siptrunks/#guid_or_address/routingrules/count/
+
+       Fetch a JSON object with a key of "count", and an integer value
+       representing the number of routing rules on that trunk.
+
+       GET /mslrest/mbg/v1/siptrunks/#guid_or_address/routingrules/all/
+
+       Fetch the routing rules for a single sip trunk, encoded in a JSON
+       response object, like so:
+
+       Returns(json):
+
+           { "response": [
+                   {
+                       "guid": "ab3395965f476d8d57917e99b9fb58f5a1c929c1",
+                       "header_match": "req",
+                       "icp1": "mymcd",
+                       "icp2": "None",
+                       "rule": "*",
+                       "rule_number": 1,
+                       "trunk": "my sip trunk"
+                   }
+               ]
+           }
+
+       Note, the trunk returns its natural key, which is its name. The URL
+       used should already have the guid or address of the trunk, so the name
+       is somewhat redundant.
+
+       GET /mslrest/mbg/v1/siptrunks/#guid_or_address/routingrules/
+
+       Fetch a JSON object with an embedded array of trunk routing rule guids.
+
+       ie.
+           {
+               "response": [
+                   "1bfca97f57d82610ccc09b1477700e56d67a6b99",
+                   "4e6b2a0fc7ad6bd8b707c69c6c9aa5b7bfb3f7c7"
+               ]
+           }
+
+       GET
+       /mslrest/mbg/v1/siptrunks/#guid_or_address/routingrules/#pattern_or_guid/
+
+       Fetch an individual routing rule by its pattern or guid, and the sip
+       trunk guid.
+
+       Returns(json)
+
+           {
+               "guid": "ab3395965f476d8d57917e99b9fb58f5a1c929c1",
+               "header_match": "req",
+               "icp1": "mymcd",
+               "icp2": "None",
+               "rule": "*",
+               "rule_number": 1,
+               "trunk":
+               "940ec0110711d9ce23656f29a03f0fc7d7aabc48"
+           }
+
+       POST /mslrest/mbg/v1/siptrunks/#guid_or_address/routingrules/
+
+       Create a new routing rule. The rule number will be automatically
+       assigned by appending the rule to the bottom of the list.
+
+       If the rule number of the rule is populated, then the new rule will be
+       inserted at that position, and subsequent rules will be "pushed" down
+       one rule number, facilitating rule insertion.
+
+       Input(json) The rule definition.
+
+           {
+               "rule": "613XXXXXXX",
+               "icp1": "940ec0110711d9ce23656f29a03f0fc7d7aabc48",
+               "icp2": null,
+               "header_match": "req"
+           }
+
+       For the icps you can also use the natural keys, being the name of the
+       icp.
+
+       Optionally you can supply a rule_number, which if conflicting with an
+       existing rule, will result in a rule insertion, pushing existing rules
+       "down" on the list.
+
+       Spaces in the rule numbers will always be removed.
+
+       ie. 1 2 3 5 will become 1 2 3 4
+
+       Note, header_match is based on this list of choices:
+
+           HEADER_MATCH_CHOICES = (
+               ('req', 'Request URI'),
+               ('from', 'From header URI'),
+               ('to', 'To header URI')
+               )
+
+       Optionally, the input can be a list of rules instead:
+
+       ie.
+           [
+               {
+                   "rule": "613XXXXXXX",
+                   "icp1": "940ec0110711d9ce23656f29a03f0fc7d7aabc48",
+                   "icp2": null,
+                   "header_match": "req"
+               },
+               {
+                   "rule": "905XXXXXXX",
+                   "icp1": "940ec0110711d9ce23656f29a03f0fc7d7aabc48",
+                   "icp2": null,
+                   "header_match": "req"
+               }
+           ]
+
+       Returns(json) The guid and rule_number assigned to the rule.
+
+       ie.
+           {
+               "guid": "940ec0110711d9ce23656f29a03f0fc7d7aabc48",
+               "rule_number": 5
+           }
+
+       Or, if a list was the input, a list will be the response...
+
+       ie.
+           [
+               {
+                   "guid": "940ec0110711d9ce23656f29a03f0fc7d7aabc48",
+                   "rule_number": 5
+               },
+               {
+                   "guid": "945ec0112711d9ce23656f29a03f0fc7d7aabc50",
+                   "rule_number": 6
+               }
+           ]
+
+       PUT
+       /mslrest/mbg/v1/siptrunks/#guid_or_address/routingrules/#pattern_or_guid/
+
+       Modify an existing rule, by it's pattern or its guid.
+
+       Input(json)
+
+       The name/value pairs to modify.
+
+       Returns
+
+       200 OK for success.
+
+       Note: If you change the rule_number to that of an existing rule, that
+       existing rule will be updated to the rule_number of the rule that you
+       are modifying, effectively swapping the position of the two rules in
+       the order list.
+
+       DELETE
+       /mslrest/mbg/v1/siptrunks/#guid_or_address/routingrules/#pattern_or_guid/
+
+       Delete an existing rule.
+
+       Input(json)
+
+       None
+
+       Returns
+
+       200 OK for success.
+
+       Note: The rules must be re-ordered post-deletion to remove spaces.
+
+       GET /mslrest/mbg/v1/icps/count/
+
+       Returns a JSON object with a key of "count", and an integer value
+       representing the number of ICP definitions in the database.
+
+       GET /mslrest/mbg/v1/icps/all/
+
+       Returns(json):
+
+       A JSON response object containing an array of ICP definitions, like so:
+
+           {
+               "response": [
+                   {   'address': 10.38.200.37',
+                       'default_minet': 1,
+                       'default_sip': 0,
+                       'echo_capable': 0,
+                       'echo_password': ',
+                       'guid': 97e4d1f2e63ea9cf7cb3546829e091ad046b3b53',
+                       'icptype': 3300',
+                       'installer_password': ',
+                       'name': mymcd',
+                       'sip_tls_capable': 0
+                   },
+                   {   'address': 55.44.33.22',
+                       'default_minet': 0,
+                       'default_sip': 1,
+                       'echo_capable': 0,
+                       'echo_password': ',
+                       'guid': 2e1dad44c98523f1af669581d39e27cae6fce4b0',
+                       'icptype': 3300',
+                       'installer_password': 12345',
+                       'name': my other icp',
+                       'sip_tls_capable': 1
+                   }
+               ]
+           }
+
+       GET /mslrest/mbg/v1/icps/
+
+       Returns(json):
+
+       A JSON response object containing an array of ICP guids.
+
+       ie.
+           {
+               "response": [
+                   "b2db2f1d570d4c05803de459c878603e4360dbe0",
+                   "eebe155647fe82e90e1cb969f905e3fc4d7ed325"
+               ]
+           }
+
+       GET /mslrest/mbg/v1/icps/#guid_or_address/routingrules/
+
+       Fetch all sip trunk routing rule guids making use of the icp referenced
+       by the guid or address.
+
+       Returns(json)
+
+       A JSON response object containing an array of the guids corresponding
+       to the routing rules matching.
+
+       GET /mslrest/mbg/v1/icps/#guid_or_address/devices/minet/
+
+       Fetch all minet devices making use of the icp referenced by the guid or
+       address.
+
+       Returns(json)
+
+       A JSON response object containing an array of the guids corresponding
+       to the devices matching.
+
+       GET /mslrest/mbg/v1/icps/#guid_or_address/devices/sip/
+
+       Fetch all sip devices making use of the icp referenced by the guid or
+       address.
+
+       Returns(json)
+
+       A JSON response object containing an array of the guids corresponding
+       to the devices matching.
+
+       GET /mslrest/mbg/v1/icps/#guid_or_address/
+
+       Returns(json):
+
+       A JSON object representing the icp.
+
+       ie.
+           {   'address': 55.44.33.22',
+               'default_minet': 0,
+               'default_sip': 1,
+               'echo_capable': 0,
+               'echo_password': ',
+               'guid': 2e1dad44c98523f1af669581d39e27cae6fce4b0',
+               'icptype': 3300',
+               'installer_password': 12345',
+               'name': my other icp',
+               'sip_tls_capable': 1
+           }
+
+       POST /mslrest/mbg/v1/icps/
+
+       Create a new ICP.
+
+       Input(json)
+
+       The ICP definition.
+
+           {
+               "name": "My icp",
+               "address": "1.2.3.4" or "myicp.foo.com",
+               "icptype": "3300"
+           }
+
+       Additional fields:
+
+           * installer_password
+
+           * default_minet
+
+           * default_sip
+
+           * echo_capable
+
+           * echo_password
+
+           * sip_tls_capable
+
+       Returns(json)
+
+       200 OK and the guid of the new ICP on success.
+
+       ie.
+
+           { "guid": "97e4d1f2e63ea9cf7cb3546829e091ad046b3b53" }
+
+       Or,
+
+       400 invalid on bad input
+
+       PUT /mslrest/mbg/v1/icps/#guid_or_address/
+
+       Modify an existing ICP, by it's guid or name.
+
+       Input(json)
+
+       The name/value pairs that you want to modify.
+
+       ie.
+           FIXME
+
+       Returns (json)
+
+       200 OK on success, 400 on bad input.
+
+       DELETE /mslrest/mbg/v1/icps/#guid_or_address/
+
+       Delete an existing ICP. Note that this will cascade to any sets or
+       siptrunk routing rules that are referencing this ICP.
+
+       GET /mslrest/mbg/v1/devices/minet/
+
+       Fetch all MiNet device guids.
+
+       Returns(json): A response object containing an array of guids, like
+       so...
+
+       ie.
+           {
+               "response": [
+                   "f914175a65f0aa0d5ed490605c4cdf47ab546afd",
+                   "a306417f8eae99a4e0cb066535f2489621d9026b",
+                   "cb0143d30c4c61744cc2941f7e22881be27c8763",
+                   "a2fd2f2bcbf2e9dbfbdacdbea5f3489a7bb6a98f",
+                   "4cbd331785d146a835e8bf9e71e0de44c35f7ce0",
+                   "1d298ebd48e7194e08a4121569bad5b8b977c129",
+                   "268a74b888759e596f719139d85fc6d7f17bd9d2",
+                   "b4acb7fb304e4d2652304ecd27bdcdc019f113da",
+                   "2b92044acd3a495062e37d6947d9d9821fe57483",
+                   "14786570b2220de5d1484b7a74ffa4aeab2c3db9",
+                   "0701163b81e1cfbd1a38ba347d9ec50eb40f068a",
+                   "c04b8a793d30d325260485fd9d1ba59d3606b4e3",
+                   "7528469c80c8942caa59495cf9319693ff25ffd2",
+                   "02a3b1ba221bf876cf09775c074df5c029623c67",
+                   "4b98e604c8e10af9a695ee7e6a58e990f8316a6d",
+                   "c7d917ae14973a32a4b1b0da81f5a3a233d9d6f4",
+                   "6149597c8b35e246f65fccc68470b060eb0a79f2"
+               ]
+           }
+
+       GET /mslrest/mbg/v1/devices/minet/count/
+
+       Fetch the count of the MiNet devices.
+
+       Returns(json): The count of the objects at the time of the request.
+
+       ie.
+           { "count": 100 }
+
+       GET /mslrest/mbg/v1/devices/minet/all/
+
+       Fetch all of the MiNet devices.
+
+       Returns(json): All of the MiNet device records, as a JSON array
+       embedded in a JSON object with the key of "response".
+
+       ie.
+           {
+               "response": [
+                   {
+                       "call_recording": "usemaster",
+                       "clientid": "AB:CD:EF:12:34:56",
+                       "clusterzone": "Default",
+                       "compression": "usemaster",
+                       "connected": false,
+                       "current_icp": "Unknown",
+                       "description": "minet set one",
+                       "disable_srtp": "usemaster",
+                       "enabled": true,
+                       "enabledjl": "usemaster",
+                       "guid": "80b438f32930390addf522e850cc6f36a1847b89",
+                       "icp": "my icp",
+                       "in_call": false,
+                       "last_address": "Unknown",
+                       "last_modified": 1300977948,
+                       "local_streaming": "usemaster",
+                       "logverbosity": -100,
+                       "natted": false,
+                       "per_set_log": false,
+                       "persistent": true,
+                       "rtpframesize": 0,
+                       "setside_codec": "usemaster",
+                       "settype": "Unknown",
+                       "time_format": 0,
+                       "timezone": "",
+                       "tugid": "Unknown",
+                       "typelabel": "Unknown"
+                   },
+                   ...
+               ]
+           }
+
+       GET /mslrest/mbg/v1/devices/minet/:guid_or_mac/
+
+       Fetch an individual set by guid or mac address.
+
+       DELETE /mslrest/mbg/v1/devices/minet/:guid_or_mac/
+
+       Delete an individual set by guid or mac address.
+
+       PUT /mslrest/mbg/v1/devices/minet/:guid_or_mac/
+
+       Modify an existing MiNet set by its guid or mac address.
+
+       Input(json):
+
+       ie.
+           { "enabled": true }
+
+       Returns:
+
+       Standard HTTP response codes. 200 OK for success.
+
+       GET /mslrest/mbg/v1/devices/sip/
+
+       Fetch all SIP devices.
+
+       Returns(json): A response object containing an array of guids, like
+       so...
+
+       ie.
+           {
+               "response": [
+                   "f914175a65f0aa0d5ed490605c4cdf47ab546afd",
+                   "a306417f8eae99a4e0cb066535f2489621d9026b",
+                   "cb0143d30c4c61744cc2941f7e22881be27c8763",
+                   "a2fd2f2bcbf2e9dbfbdacdbea5f3489a7bb6a98f",
+                   "4cbd331785d146a835e8bf9e71e0de44c35f7ce0",
+                   "1d298ebd48e7194e08a4121569bad5b8b977c129",
+                   "268a74b888759e596f719139d85fc6d7f17bd9d2",
+                   "b4acb7fb304e4d2652304ecd27bdcdc019f113da",
+                   "2b92044acd3a495062e37d6947d9d9821fe57483",
+                   "14786570b2220de5d1484b7a74ffa4aeab2c3db9",
+                   "0701163b81e1cfbd1a38ba347d9ec50eb40f068a",
+                   "c04b8a793d30d325260485fd9d1ba59d3606b4e3",
+                   "7528469c80c8942caa59495cf9319693ff25ffd2",
+                   "02a3b1ba221bf876cf09775c074df5c029623c67",
+                   "4b98e604c8e10af9a695ee7e6a58e990f8316a6d",
+                   "c7d917ae14973a32a4b1b0da81f5a3a233d9d6f4",
+                   "6149597c8b35e246f65fccc68470b060eb0a79f2"
+               ]
+           }
+
+       GET /mslrest/mbg/v1/devices/sip/count/
+
+       Fetch the count of the SIP devices.
+
+       Returns(json): The count of the objects at the time of the request.
+
+       ie.
+           { "count": 100 }
+
+       GET /mslrest/mbg/v1/devices/sip/all/
+
+       Fetch all of the SIP devices.
+
+       Returns(json): All of the SIP device records, as a JSON array embedded
+       in a JSON object with the key of "response".
+
+       ie.
+           {
+               "response": [
+                   {
+                       "call_recording": "usemaster",
+                       "challenge_methods": "",
+                       "clientid": "FF:FF:AD:18:9C:1B",
+                       "connected": false,
+                       "current_icp": "Unknown",
+                       "description": "sip set one",
+                       "enabled": true,
+                       "enabledjl": "usemaster",
+                       "guid": "bfcafc2ed5949b04de213cdeb604a30988f277be",
+                       "heartbeat_interval": null,
+                       "icp": "sip icp",
+                       "icpside_password": "4321",
+                       "icpside_username": "1234",
+                       "in_call": false,
+                       "last_address": "Unknown",
+                       "last_modified": 1300978338,
+                       "local_streaming": "usemaster",
+                       "logverbosity": -100,
+                       "natted": false,
+                       "options_hb": "off",
+                       "per_set_log": false,
+                       "persistent": true,
+                       "prack_support": "usemaster",
+                       "rtpframesize": 0,
+                       "set_side_rtp_security": "none",
+                       "setside_codec": "g.711",
+                       "setside_password": "simpson",
+                       "setside_username": "homer",
+                       "settype": "Unknown",
+                       "tugid": "Unknown",
+                       "typelabel": "Unknown"
+                   },
+                   ...
+               ]
+           }
+
+       GET /mslrest/mbg/v1/devices/sip/:guid_or_mac/
+
+       Fetch an individual set by guid or mac address.
+
+       DELETE /mslrest/mbg/v1/devices/sip/:guid_or_mac/
+
+       Delete an individual set by guid or mac address.
+
+       PUT /mslrest/mbg/v1/devices/sip/:guid_or_mac/
+
+       Modify an existing SIP set by its guid or mac address.
+
+       Input(json):
+
+       ie.
+           { "enabled": true }
+
+       Returns:
+
+       Standard HTTP response codes. 200 OK for success.
+
+       POST /mslrest/mbg/v1/devices/minet/
+
+       Create a new MiNet set.
+
+       Input(json):
+
+       All required fields, plus any defaults that you would like to override.
+
+       ie.
+
+           {
+               "clientid": "AB:CD:EF:12:34:56",
+               "description": "minet set one",
+               "enabled": true
+           }
+
+       Note: If you specify the icp to use beyond the MiNet default icp, you
+       refer to it by its name, not its guid. It was felt that using a natural
+       key was more readable.
+
+       Returns(json):
+
+       The guid of the newly created object.
+
+       ie.
+           { "guid": "ff8723d7008c96f7235db98a9979ce8f99629288" }
+
+       See the GET request for all available fields. Not all are settable.
+
+       POST /mslrest/mbg/v1/devices/sip/
+
+       Create a new SIP set.
+
+       Input(json):
+
+       All required fields, plus any defaults that you would like to override.
+
+       ie.
+           {
+               "clientid": "FF:FF:AD:18:9C:1B",
+               "description": "sip set one",
+               "enabled": true,
+               "icpside_password": "4321",
+               "icpside_username": "1234",
+               "setside_password": "simpson",
+               "setside_username": "homer"
+           }
+
+       Note: If you specify the icp to use beyond the SIP default icp, you
+       refer to it by its name, not its guid. It was felt that using a natural
+       key was more readable.
+
+       Returns(json):
+
+       The guid of the newly created object.
+
+       ie.
+           { "guid": "d63a9e1814e383417502883918be628820e57ff2" }
+
+       See the GET request for all available fields. Not all are settable.
+
+       GET /mslrest/mbg/v1/proxies/all/
+
+       Fetch all proxy configurations.
+
+       Input: none
+
+       Returns(json):
+
+       A response object, containing a list of proxy definitions, like so:
+
+           "response": [
+               {
+                   "access": "public",
+                   "application": "acd",
+                   "burst_connection_rate": 0,
+                   "connect_to": "",
+                   "default_connect_ports": "5025",
+                   "default_listen_ports": "36003",
+                   "enabled": false,
+                   "follow_set": false,
+                   "guid": "44877aba6ec24a697426945caca50352dceb1025",
+                   "idle_timeout": 0,
+                   "inet_protocol": "tcp",
+                   "listen": "0.0.0.0:36003",
+                   "log_verbosity": -100,
+                   "manual": false,
+                   "name": "acd_auditor",
+                   "override_connect_to": "",
+                   "protocol": "simple",
+                   "secure_in": "ssl",
+                   "secure_in_add_ip_to_subjectaltname": false,
+                   "secure_in_add_ip_to_subjectname": false,
+                   "secure_in_ca_name": "127.0.0.1",
+                   "secure_in_cert_file": "/etc/tug/tug.ini.certificates.ini",
+                   "secure_in_peer_cn_has_mac": false,
+                   "secure_in_resign_add_subjectaltname": "",
+                   "secure_in_resign_add_subjectname": "",
+                   "secure_in_ssl_cipher_suite": "",
+                   "secure_in_ssl_peer": true,
+                   "secure_in_use_cert": true,
+                   "secure_in_validation_level": 6,
+                   "secure_out": "none",
+                   "secure_out_ssl_cipher_suite": "",
+                   "secure_out_ssl_peer": true,
+                   "secure_out_validation_level": -1,
+                   "sustained_connection_rate": 0
+               },
+               ...
+           ]
+
+
+
+perl v5.10.1                      2014-11-10            Mitel::MslRest::mbg(3)
